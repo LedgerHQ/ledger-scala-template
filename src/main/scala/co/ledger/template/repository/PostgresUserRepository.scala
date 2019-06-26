@@ -2,13 +2,16 @@ package co.ledger.template.repository
 
 import cats.effect.Async
 import cats.syntax.applicativeError._
+import cats.syntax.functor._
 import co.ledger.template.model._
 import co.ledger.template.repository.algebra.UserRepository
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.invariant.UnexpectedEnd
 import doobie.util.query.Query0
+import doobie.util.update.Update0
 import doobie.util.transactor.Transactor
+import co.ledger.template.model
 
 // It requires a created database `users` with db user `postgres` and password `postgres`. See `users.sql` file in resources.
 class PostgresUserRepository[F[_] : Async](xa: Transactor[F]) extends UserRepository[F] {
@@ -22,6 +25,16 @@ class PostgresUserRepository[F[_] : Async](xa: Transactor[F]) extends UserReposi
     program.map(Option.apply).transact(xa).recoverWith {
       case UnexpectedEnd => Async[F].delay(None) // In case the user is not unique in your db. Check out Doobie's docs.
     }
+  }
+
+  override def addUser(user: model.User): F[Unit] = {
+    UserStatement.addUser(user).run.transact(xa).void
+  }
+  override def deleteUser(username: model.UserName): F[Unit] = {
+    UserStatement.deleteUser(username).run.transact(xa).void
+  }
+  override def updateUser(user: model.User): F[Unit] = {
+    UserStatement.updateUser(user).run.transact(xa).void
   }
 
 }
@@ -39,7 +52,13 @@ object UserStatement {
   }
 
   def updateUser(user: User): Update0 = {
-    sql""
+    sql"UPDATE api_user SET email = ${user.email.value} where username = ${user.username.value}"
+      .update
+  }
+
+  def deleteUser(username: UserName): Update0 = {
+    sql"DELETE FROM api_user WHERE username = ${username.value}"
+      .update
   }
 
 }

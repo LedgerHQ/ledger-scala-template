@@ -6,6 +6,9 @@ object algebra {
 
   trait UserRepository[F[_]] {
     def findUser(username: UserName): F[Option[User]]
+    def addUser(user: User): F[Unit]
+    def updateUser(user: User): F[Unit]
+    def deleteUser(username: UserName): F[Unit]
   }
 
 }
