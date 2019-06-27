@@ -9,6 +9,10 @@ lazy val LogbackVersion    = "1.2.3"
 lazy val ScalaTestVersion  = "3.0.8"
 lazy val ScalaCheckVersion = "1.14.0"
 lazy val PureconfigVersion = "0.11.1"
+lazy val assemblyFolder = file("assembly")
+lazy val ignoreFiles = List("application.conf", "logback.xml")
+
+enablePlugins(DockerPlugin)
 
 lazy val root = (project in file("."))
   .settings(
@@ -83,6 +87,41 @@ lazy val root = (project in file("."))
       "org.scalatest"   %% "scalatest"           % ScalaTestVersion  % Test,
       "org.scalacheck"  %% "scalacheck"          % ScalaCheckVersion % Test,
       "org.tpolecat"    %% "doobie-scalatest"    % DoobieVersion % Test
-    )
-  )
+    ),
 
+    cleanFiles += assemblyFolder,
+    test in assembly := {},
+    assemblyOutputPath in assembly := assemblyFolder / (name.value + "-v" + version.value + ".jar"),
+    // Remove resources files from the JAR (they will be copied to an external folder)
+    assemblyMergeStrategy in assembly := {
+      case PathList("META-INF", _) => MergeStrategy.discard
+      case PathList("BUILD") => MergeStrategy.discard
+      case path =>  if (ignoreFiles.contains(path))
+        MergeStrategy.discard
+      else
+        (assemblyMergeStrategy in assembly).value(path)
+    },
+    imageNames in docker := Seq(
+      // Sets the latest tag
+      ImageName(s"ledgerhq/${name.value}:latest"),
+
+      // Sets a name with a tag that contains the project version
+      ImageName(
+        namespace = Some("ledgerhq"),
+        repository = name.value,
+        tag = Some("v" + version.value)
+      )
+    ),
+    // User `docker` to build docker image
+    dockerfile in docker := {
+      // The assembly task generates a fat JAR file
+      val artifact: File = assembly.value
+      val artifactTargetPath = s"/app/${artifact.name}"
+
+      new Dockerfile {
+        from("openjdk:8-jre")
+        add(artifact, artifactTargetPath)
+        entryPoint("java", "-jar", artifactTargetPath)
+      }
+    }
+  )

@@ -23,7 +23,7 @@ trait RepositorySpec extends FunSuiteLike with BeforeAndAfterAll with IOChecker 
     * directly. Should be changed when doobie updates it.
     */
   override def transactor: doobie.Transactor[IO] =
-    Transactor.fromDriverManager("org.h2.driver", dbUrl, dbUser, dbPass)
+    Transactor.fromDriverManager("org.h2.Driver", dbUrl, dbUser, dbPass)
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()

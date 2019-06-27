@@ -38,8 +38,8 @@ class UserHttpEndpointSpec extends UserHttpRoutesFixture with FlatSpecLike with 
     for {
       task  <- httpRoutes(req).value
       _     <- task.fold(IO(fail("Empty response")) *> IO.unit) {response =>
-                 IO(response.status should be (Status.Created))
-               }
+        IO(response.status should be (Status.Created))
+      }
     } yield ()
   }
 
