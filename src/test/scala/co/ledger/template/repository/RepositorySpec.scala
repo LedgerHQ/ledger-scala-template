@@ -2,6 +2,7 @@ package co.ledger.template.repository
 
 import cats.effect.{ContextShift, IO}
 import doobie.scalatest.IOChecker
+import doobie.util.transactor.Transactor
 import org.flywaydb.core.Flyway
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}
 
@@ -15,6 +16,14 @@ trait RepositorySpec extends FunSuiteLike with BeforeAndAfterAll with IOChecker 
   val dbUrl   = "jdbc:h2:mem:users;MODE=PostgreSQL;DB_CLOSE_DELAY=-1"
   val dbUser  = "sa"
   val dbPass  = ""
+
+
+  /** doobie is migrating to Resource for the transactor.
+    * But the IOChecker doesn't adapt yet, so here we generate transactor
+    * directly. Should be changed when doobie updates it.
+    */
+  override def transactor: doobie.Transactor[IO] =
+    Transactor.fromDriverManager("org.h2.driver", dbUrl, dbUser, dbPass)
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()

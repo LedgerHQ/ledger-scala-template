@@ -1,13 +1,13 @@
 package co.ledger.template.repository
 
+import co.ledger.template.model.{Email, User, UserName}
 import org.scalacheck._
 import org.scalatest.{FlatSpecLike, Matchers}
-import org.scalatest.prop.PropertyChecks
-import co.ledger.template.model.{Email, User, UserName}
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 class ConversionSpec extends UserArbitraries with FlatSpecLike with Matchers {
 
-  forAll { (dto: UserDTO) =>
+  forAll { dto: UserDTO =>
     it should s"convert a dto: $dto into an User" in {
       dto.toUser should be(User(UserName(dto._2), Email(dto._3)))
     }
@@ -15,7 +15,7 @@ class ConversionSpec extends UserArbitraries with FlatSpecLike with Matchers {
 
 }
 
-trait UserArbitraries extends PropertyChecks {
+trait UserArbitraries extends ScalaCheckPropertyChecks {
 
   implicit val userDtoArbitraries: Arbitrary[UserDTO] = Arbitrary[UserDTO] {
     for {

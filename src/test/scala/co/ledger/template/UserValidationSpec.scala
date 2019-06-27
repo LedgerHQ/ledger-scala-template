@@ -1,9 +1,9 @@
 package co.ledger.template
 
-import org.scalatest.FunSuite
-import org.scalatest.prop.PropertyChecks
 import co.ledger.template.model.CreateUser
 import co.ledger.template.validation.UserValidation
+import org.scalatest.FunSuite
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 class UserValidationSpec extends FunSuite with UserValidationFixture {
 
@@ -21,7 +21,7 @@ class UserValidationSpec extends FunSuite with UserValidationFixture {
 
 }
 
-trait UserValidationFixture extends PropertyChecks {
+trait UserValidationFixture extends ScalaCheckPropertyChecks {
 
   val invalidExamples = Table(
     "createUser",
