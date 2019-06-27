@@ -10,7 +10,7 @@ lazy val ScalaTestVersion  = "3.0.8"
 lazy val ScalaCheckVersion = "1.14.0"
 lazy val PureconfigVersion = "0.11.1"
 lazy val assemblyFolder = file("assembly")
-lazy val ignoreFiles = List("application.conf", "logback.xml")
+lazy val ignoreFiles = List("application.conf")
 
 enablePlugins(DockerPlugin)
 

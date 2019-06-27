@@ -1,30 +1,43 @@
 package co.ledger.template
 
-import cats.effect.{Async, ContextShift}
-import doobie.util.transactor.Transactor
-import org.http4s.{HttpApp, HttpRoutes}
-import org.http4s.implicits._
+import cats.effect.{Async, Blocker, ContextShift, Resource}
 import co.ledger.template.http.{HttpErrorHandler, UserHttpRoutes}
 import co.ledger.template.repository.PostgresUserRepository
 import co.ledger.template.repository.algebra.UserRepository
 import co.ledger.template.service.UserService
+import doobie.hikari.HikariTransactor
+import doobie.util.ExecutionContexts
+import org.http4s.implicits._
+import org.http4s.{HttpApp, HttpRoutes}
 
 // Custom DI module
-class Module[F[_]: Async: ContextShift] {
+class Module[F[_] : Async : ContextShift] {
 
-  private val xa: Transactor[F] =
-    Transactor.fromDriverManager[F](
-      "org.postgresql.Driver", "jdbc:postgresql:users", "postgres", "postgres"
+  // Resource yielding a transactor configured with a bounded connect EC and an unbounded
+  // transaction EC. Everything will be closed and shut down cleanly after use.
+  val transactor: Resource[F, HikariTransactor[F]] = for {
+    ce <- ExecutionContexts.fixedThreadPool[F](32) // our connect EC
+    te <- ExecutionContexts.cachedThreadPool[F] // our transaction EC
+    xa <- HikariTransactor.newHikariTransactor[F](
+      "org.postgresql.Driver", // driver classname
+      "jdbc:postgresql:users", // connect URL
+      "postgres", // username
+      "postgres", // password
+      ce, // await connection here
+      Blocker.liftExecutionContext(te) // execute JDBC operations here
     )
+  } yield xa
 
-  private val userRepository: UserRepository[F] = new PostgresUserRepository[F](xa)
+  val httpApp: Resource[F, HttpApp[F]] = transactor.map { xa =>
+    val userRepository: UserRepository[F] = new PostgresUserRepository[F](xa)
 
-  private val userService: UserService[F] = new UserService[F](userRepository)
+    val userService: UserService[F] = new UserService[F](userRepository)
 
-  implicit val httpErrorHandler: HttpErrorHandler[F] = new HttpErrorHandler[F]
+    implicit val httpErrorHandler: HttpErrorHandler[F] = new HttpErrorHandler[F]
 
-  private  val userRoutes: HttpRoutes[F] = new UserHttpRoutes[F](userService).routes
+    val userRoutes: HttpRoutes[F] = new UserHttpRoutes[F](userService).routes
 
-  val httpApp: HttpApp[F] = userRoutes.orNotFound
+    userRoutes.orNotFound
+  }
 
 }

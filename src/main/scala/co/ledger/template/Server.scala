@@ -12,16 +12,18 @@ object Server extends IOApp {
 
 }
 
-class HttpServer[F[_]: ConcurrentEffect: ContextShift: Timer] {
+class HttpServer[F[_] : ConcurrentEffect : ContextShift : Timer] {
 
   private val ctx = new Module[F]
 
   def server: F[Unit] =
-    BlazeServerBuilder[F]
-      .bindHttp(8080, "0.0.0.0")
-      .withHttpApp(ctx.httpApp)
-      .serve
-      .compile
-      .drain
+    ctx.httpApp.use(app =>
+      BlazeServerBuilder[F]
+        .bindHttp(8080, "0.0.0.0")
+        .withHttpApp(app)
+        .serve
+        .compile
+        .drain
+    )
 
 }
