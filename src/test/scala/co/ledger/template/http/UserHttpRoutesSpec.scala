@@ -17,14 +17,14 @@ class UserHttpEndpointSpec extends UserHttpRoutesFixture with FlatSpecLike with 
 
   implicit val errorHandler = new HttpErrorHandler[IO]
 
-  val httpRoutes: HttpRoutes[IO] = new UserHttpRoutes[IO](TestUserService.service).routes
+  val httpRoutes: IO[HttpRoutes[IO]] = TestUserService.service.map(new UserHttpRoutes[IO](_).routes)
 
   implicit def createUserEncoder: EntityEncoder[IO, CreateUser] = jsonEncoderOf[IO, CreateUser]
 
   forAll(examples) { (username, expectedStatus, expectedBody) =>
     it should s"find the user with username: ${username.value}" in IOAssertion {
       val request = Request[IO](uri = Uri(path = s"/${username.value}"))
-      httpRoutes(request).value.flatMap { task =>
+      httpRoutes.flatMap(_.run(request).value).flatMap { task =>
         task.fold(IO(fail("Empty response")) *> IO.unit) { response =>
           IO(response.status        should be (expectedStatus)) *>
           IO(response.body.asString should be (expectedBody))
@@ -36,7 +36,8 @@ class UserHttpEndpointSpec extends UserHttpRoutesFixture with FlatSpecLike with 
   it should "Create a user" in IOAssertion {
     val req = Request[IO](method = Method.POST).withEntity(CreateUser("root", "root@unix.org"))
     for {
-      task  <- httpRoutes(req).value
+      routes <- httpRoutes
+      task  <- routes(req).value
       _     <- task.fold(IO(fail("Empty response")) *> IO.unit) {response =>
         IO(response.status should be (Status.Created))
       }

@@ -6,17 +6,15 @@ import cats.syntax.functor._
 import co.ledger.template.model._
 import co.ledger.template.service.UserService
 import co.ledger.template.validation.UserValidation
-import io.circe.Decoder
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s._
 import org.http4s.circe._
+import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.dsl.Http4sDsl
 
 class UserHttpRoutes[F[_]: Sync](userService: UserService[F])
                                 (implicit H: HttpErrorHandler[F]) extends Http4sDsl[F] {
-
-  implicit def createUserDecoder[A : Decoder]: EntityDecoder[F, A] = jsonOf[F, A]
 
   val routes: HttpRoutes[F] = HttpRoutes.of[F] {
 

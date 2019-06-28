@@ -10,9 +10,11 @@ lazy val ScalaTestVersion  = "3.0.8"
 lazy val ScalaCheckVersion = "1.14.0"
 lazy val PureconfigVersion = "0.11.1"
 lazy val assemblyFolder = file("assembly")
-lazy val ignoreFiles = List("application.conf")
+lazy val ignoreFiles = List("application.conf.sample")
 
 enablePlugins(DockerPlugin)
+resolvers += Resolver.sonatypeRepo("releases")
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3")
 
 lazy val root = (project in file("."))
   .settings(

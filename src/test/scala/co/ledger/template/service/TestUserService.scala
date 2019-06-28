@@ -1,42 +1,29 @@
 package co.ledger.template.service
 
 import cats.effect.IO
-import cats.syntax.applicative._
-import co.ledger.template.TestUsers.users
-import co.ledger.template.model
+import cats.effect.concurrent.Ref
+import co.ledger.template.{TestUsers, model}
 import co.ledger.template.model.UserName
 import co.ledger.template.repository.algebra.UserRepository
 
-import scala.collection.mutable
-
 object TestUserService {
 
-  private val testUserRepo: UserRepository[IO] = new UserRepository[IO] {
+  val testRepo: IO[UserRepository[IO]] = Ref.of[IO, Map[model.UserName, model.User]](TestUsers.users.map(u => (u.username, u)).toMap).map{ state =>
+    new UserRepository[IO] {
+      override def findUser(username: UserName): IO[Option[model.User]] =
+        state.get.map(_.get(username))
 
-    val repo: mutable.Buffer[model.User] = scala.collection.mutable.Buffer(users:_*)
+      override def addUser(user: model.User): IO[Unit] =
+        state.update(l => l + (user.username -> user))
 
-    override def findUser(username: UserName): IO[Option[model.User]] =
-      repo.find(_.username.value == username.value).pure[IO]
+      override def updateUser(user: model.User): IO[Unit] =
+        state.update(l => l.updated(user.username, user))
 
-    override def addUser(user: model.User): IO[Unit] = IO{
-      repo += user
-    }
-
-    override def updateUser(user: model.User): IO[Unit] = IO{
-      repo.indexWhere(_.username.value == user.username.value) match {
-        case -1 => IO.raiseError(new Exception(s"no user ${user.username.value} in the repo"))
-        case i => repo.update(i, user)
-      }
-    }
-
-    override def deleteUser(username: UserName): IO[Unit] = IO {
-      repo.indexWhere(_.username.value == username.value) match {
-        case -1 => IO.raiseError(new Exception(s"no user ${username.value} in the repo"))
-        case i => repo.remove(i)
-      }
+      override def deleteUser(username: UserName): IO[Unit] =
+        state.update(m => m - username)
     }
   }
 
-  val service: UserService[IO] = new UserService[IO](testUserRepo)
+  val service: IO[UserService[IO]] = testRepo.map(new UserService[IO](_))
 
 }
