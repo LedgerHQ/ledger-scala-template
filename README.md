@@ -24,6 +24,7 @@ It contains the minimal code to get you started:
 - `UserHttpEndpoint`: Defines the http endpoints of the REST API making use of the UserService.
 - `HttpErrorHandler`: Mapping business errors to http responses in a single place.
 - `http` package: Includes custom Circe Json Encoders for value classes.
+- `config` object: Includes model related to application config.
 - `validation` object: Includes fields validation using `cats.data.ValidatedNel`.
 - `Server`: The main application that wires all the components and provide the web server.
 - `App`: The entrypoint
