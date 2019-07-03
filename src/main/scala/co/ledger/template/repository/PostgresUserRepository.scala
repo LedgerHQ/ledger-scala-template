@@ -14,16 +14,19 @@ import doobie.util.transactor.Transactor
 import co.ledger.template.model
 
 // It requires a created database `users` with db user `postgres` and password `postgres`. See `users.sql` file in resources.
-class PostgresUserRepository[F[_] : Async](xa: Transactor[F]) extends UserRepository[F] {
+class PostgresUserRepository[F[_]: Async](xa: Transactor[F])
+    extends UserRepository[F] {
 
   override def findUser(username: UserName): F[Option[User]] = {
-    val statement: ConnectionIO[UserDTO] = UserStatement.findUser(username).unique 
+    val statement: ConnectionIO[UserDTO] =
+      UserStatement.findUser(username).unique
 
     // You might have more than one query involving joins. In such case a for-comprehension would be better
     val program: ConnectionIO[User] = statement.map(_.toUser)
 
     program.map(Option.apply).transact(xa).recoverWith {
-      case UnexpectedEnd => Async[F].delay(None) // In case the user is not unique in your db. Check out Doobie's docs.
+      case UnexpectedEnd =>
+        Async[F].delay(None) // In case the user is not unique in your db. Check out Doobie's docs.
     }
   }
 
@@ -47,19 +50,15 @@ object UserStatement {
   }
 
   def addUser(user: User): Update0 = {
-    sql"INSERT INTO api_user (username, email) values (${user.username.value}, ${user.email.value})"
-      .update
+    sql"INSERT INTO api_user (username, email) values (${user.username.value}, ${user.email.value})".update
   }
 
   def updateUser(user: User): Update0 = {
-    sql"UPDATE api_user SET email = ${user.email.value} where username = ${user.username.value}"
-      .update
+    sql"UPDATE api_user SET email = ${user.email.value} where username = ${user.username.value}".update
   }
 
   def deleteUser(username: UserName): Update0 = {
-    sql"DELETE FROM api_user WHERE username = ${username.value}"
-      .update
+    sql"DELETE FROM api_user WHERE username = ${username.value}".update
   }
 
 }
-

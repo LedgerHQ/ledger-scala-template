@@ -9,8 +9,11 @@ object App extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] = {
     val config = pureconfig.loadConfigOrThrow[Config]
-    HttpServer.defaultServer[IO].run(config).use(_ => IO.never).as(ExitCode.Success)
+    HttpServer
+      .defaultServer[IO]
+      .run(config)
+      .use(_ => IO.never)
+      .as(ExitCode.Success)
   }
 
 }
-

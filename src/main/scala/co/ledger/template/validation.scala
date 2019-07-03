@@ -11,18 +11,20 @@ object validation {
     type Result[A] = ValidatedNel[String, A]
 
     private def validateUsername(username: String): Result[UserName] = {
-      if (username.matches("^[a-zA-Z0-9]+$")) new UserName(username).validNel[String]
+      if (username.matches("^[a-zA-Z0-9]+$"))
+        new UserName(username).validNel[String]
       else "Invalid username".invalidNel
     }
 
     private def validateEmail(email: String): Result[Email] = {
-      if ("""(\w+)@([\w\.]+)""".r.unapplySeq(email).isDefined) new Email(email).validNel[String]
+      if ("""(\w+)@([\w\.]+)""".r.unapplySeq(email).isDefined)
+        new Email(email).validNel[String]
       else "Invalid email".invalidNel
     }
 
     def validateCreateUser(createUser: CreateUser): Result[User] = {
       val validatedUsername = validateUsername(createUser.username)
-      val validatedEmail    = validateEmail(createUser.email)
+      val validatedEmail = validateEmail(createUser.email)
       (validatedUsername, validatedEmail).mapN(User.apply)
     }
 
@@ -32,4 +34,3 @@ object validation {
   }
 
 }
-

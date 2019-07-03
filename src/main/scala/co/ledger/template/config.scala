@@ -13,15 +13,15 @@ object config {
   }
 
   case class ServerConfig(
-    host: String,
-    port: Int
+      host: String,
+      port: Int
   )
   case class PostgresConfig(
-    url: String,
-    user: String,
-    password: String
+      url: String,
+      user: String,
+      password: String
   ) {
     def driver: String = "org.postgresql.Driver"
   }
-  
+
 }
