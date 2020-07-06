@@ -3,15 +3,15 @@ package co.ledger.template.repository
 import cats.effect.Async
 import cats.syntax.applicativeError._
 import cats.syntax.functor._
+import co.ledger.template.model
 import co.ledger.template.model._
 import co.ledger.template.repository.algebra.UserRepository
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.util.invariant.UnexpectedEnd
 import doobie.util.query.Query0
-import doobie.util.update.Update0
 import doobie.util.transactor.Transactor
-import co.ledger.template.model
+import doobie.util.update.Update0
 
 // It requires a created database `users` with db user `postgres` and password `postgres`. See `users.sql` file in resources.
 class PostgresUserRepository[F[_]: Async](xa: Transactor[F])

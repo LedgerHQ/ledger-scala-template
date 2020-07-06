@@ -9,8 +9,8 @@ import co.ledger.template.validation.UserValidation
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s._
-import org.http4s.circe._
 import org.http4s.circe.CirceEntityDecoder._
+import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 
 class UserHttpRoutes[F[_]: Sync](userService: UserService[F])(
