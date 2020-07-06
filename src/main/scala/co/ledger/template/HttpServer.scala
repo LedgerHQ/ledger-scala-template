@@ -1,18 +1,16 @@
 package co.ledger.template
 
-import cats.effect.{ConcurrentEffect, ContextShift, Timer}
 import cats.data.ReaderT
-import doobie.hikari.HikariTransactor
-import doobie.util.ExecutionContexts
-import cats.effect.Blocker
+import cats.effect.{Blocker, ConcurrentEffect, ContextShift, Resource, Timer}
+import co.ledger.template.config.{Config, ServerConfig}
 import co.ledger.template.http.{HttpErrorHandler, UserHttpRoutes}
 import co.ledger.template.repository.PostgresUserRepository
 import co.ledger.template.service.UserService
-import org.http4s.server.blaze.BlazeServerBuilder
-import co.ledger.template.config.{ServerConfig, Config}
+import doobie.hikari.HikariTransactor
+import doobie.util.ExecutionContexts
 import org.http4s.HttpRoutes
-import cats.effect.Resource
 import org.http4s.server.Server
+import org.http4s.server.blaze.BlazeServerBuilder
 
 object HttpServer {
 

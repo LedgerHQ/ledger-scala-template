@@ -1,8 +1,8 @@
 package co.ledger
 
-import co.ledger.template.config.Config
 import cats.data.ReaderT
 import cats.effect.Resource
+import co.ledger.template.config.Config
 
 package object template {
 

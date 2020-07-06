@@ -2,8 +2,8 @@ package co.ledger.template.service
 
 import cats.data.EitherT
 import cats.effect.Async
-import cats.syntax.functor._
 import cats.syntax.applicativeError._
+import cats.syntax.functor._
 import co.ledger.template.model._
 import co.ledger.template.repository.algebra.UserRepository
 

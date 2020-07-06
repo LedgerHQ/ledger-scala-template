@@ -1,14 +1,9 @@
 package co.ledger.template.http
 
 import cats.Monad
+import co.ledger.template.model.{ApiError, OtherError, UserAlreadyExist, UserNotFound}
 import org.http4s.Response
 import org.http4s.dsl.Http4sDsl
-import co.ledger.template.model.{
-  ApiError,
-  OtherError,
-  UserAlreadyExist,
-  UserNotFound
-}
 
 class HttpErrorHandler[F[_]: Monad] extends Http4sDsl[F] {
 
