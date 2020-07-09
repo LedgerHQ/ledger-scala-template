@@ -2,10 +2,10 @@ package co.ledger.template
 
 import co.ledger.template.model.CreateUser
 import co.ledger.template.validation.UserValidation
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-class UserValidationSpec extends FunSuite with UserValidationFixture {
+class UserValidationSpec extends AnyFunSuite with UserValidationFixture {
 
   forAll(invalidExamples) { createUser =>
     test(s"invalid user $createUser") {

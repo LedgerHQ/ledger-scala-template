@@ -4,11 +4,13 @@ import cats.effect.{ContextShift, IO}
 import doobie.scalatest.IOChecker
 import doobie.util.transactor.Transactor
 import org.flywaydb.core.Flyway
-import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}
+import org.flywaydb.core.api.configuration.ClassicConfiguration
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.funsuite.AnyFunSuiteLike
 
 import scala.concurrent.ExecutionContext
 
-trait RepositorySpec extends FunSuiteLike with BeforeAndAfterAll with IOChecker {
+trait RepositorySpec extends AnyFunSuiteLike with BeforeAndAfterAll with IOChecker {
 
   val ec: ExecutionContext = ExecutionContext.global
   implicit val cs: ContextShift[IO] = IO.contextShift(ec)
@@ -17,6 +19,8 @@ trait RepositorySpec extends FunSuiteLike with BeforeAndAfterAll with IOChecker 
   val dbUser  = "sa"
   val dbPass  = ""
 
+  val config = new ClassicConfiguration()
+  config.setDataSource(dbUrl, dbUser, dbPass)
 
   /** doobie is migrating to Resource for the transactor.
     * But the IOChecker doesn't adapt yet, so here we generate transactor
@@ -32,8 +36,7 @@ trait RepositorySpec extends FunSuiteLike with BeforeAndAfterAll with IOChecker 
 
   private val migrateDB: IO[Unit] =
     IO {
-      val flyway = new Flyway
-      flyway.setDataSource(dbUrl, dbUser, dbPass)
+      val flyway = new Flyway(config)
       flyway.migrate()
     }
 

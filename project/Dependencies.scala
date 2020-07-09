@@ -39,12 +39,14 @@ object Dependencies extends DependencyBuilders with LibraryManagementSyntax {
     "com.github.pureconfig" %% "pureconfig"      % pureconfigVersion
   )
 
-  val scalaTestVersion  = "3.2.0"
-  val scalaCheckVersion = "1.14.3"
+  val scalaTestVersion     = "3.2.0"
+  val scalaTestPlusVersion = "3.2.0.0"
+  val scalaCheckVersion    = "1.14.3"
   val test: Seq[ModuleID] = Seq(
-    "org.scalatest"  %% "scalatest"        % scalaTestVersion  % Test,
-    "org.scalacheck" %% "scalacheck"       % scalaCheckVersion % Test,
-    "org.tpolecat"   %% "doobie-scalatest" % doobieVersion     % Test
+    "org.scalatest"     %% "scalatest"        % scalaTestVersion  % Test,
+    "org.scalacheck"    %% "scalacheck"       % scalaCheckVersion % Test,
+    "org.scalatestplus" %% "scalacheck-1-14"  % scalaTestPlusVersion % Test,
+    "org.tpolecat"      %% "doobie-scalatest" % doobieVersion     % Test
   )
 
   val all: Seq[ModuleID] = http4s ++ circe ++ db ++ utilities ++ test
