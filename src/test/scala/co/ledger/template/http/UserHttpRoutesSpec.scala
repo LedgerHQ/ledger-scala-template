@@ -1,7 +1,6 @@
 package co.ledger.template.http
 
 import cats.effect.IO
-import cats.syntax.apply._
 import co.ledger.template.IOAssertion
 import co.ledger.template.TestUsers._
 import co.ledger.template.http.ResponseBodyUtils._
@@ -10,10 +9,11 @@ import co.ledger.template.service.TestUserService
 import io.circe.generic.auto._
 import org.http4s.circe._
 import org.http4s.{EntityEncoder, HttpRoutes, Method, Request, Status, Uri}
-import org.scalatest.{FlatSpecLike, Matchers}
+import org.scalatest.flatspec.AnyFlatSpecLike
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-class UserHttpEndpointSpec extends UserHttpRoutesFixture with FlatSpecLike with Matchers {
+class UserHttpEndpointSpec extends UserHttpRoutesFixture with AnyFlatSpecLike with Matchers {
 
   implicit val errorHandler = new HttpErrorHandler[IO]
 
