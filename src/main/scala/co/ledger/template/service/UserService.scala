@@ -1,6 +1,5 @@
 package co.ledger.template.service
 
-import cats.data.EitherT
 import cats.effect.Async
 import cats.syntax.applicativeError._
 import cats.syntax.functor._
@@ -14,8 +13,12 @@ class UserService[F[_]: Async](userRepo: UserRepository[F]) {
       maybeUser.toRight[ApiError](UserNotFound(username))
     }
 
-  def findAll: F[ApiError Either List[User]] =
-    EitherT.rightT(List.empty[User]).value
+  def findAll: F[ApiError Either List[User]] = {
+    userRepo.findAll()
+      .attemptT
+      .leftMap[ApiError](e => OtherError(e.getMessage))
+      .value
+  }
 
   def addUser(user: User): F[ApiError Either Unit] =
     userRepo

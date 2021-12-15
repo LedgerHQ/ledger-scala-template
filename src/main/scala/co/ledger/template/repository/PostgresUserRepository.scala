@@ -17,6 +17,17 @@ import doobie.util.update.Update0
 class PostgresUserRepository[F[_]: Async](xa: Transactor[F])
     extends UserRepository[F] {
 
+  override def findAll(): F[List[User]] = {
+    UserStatement.findAll()
+      .to[List]
+      .map(_.map(_.toUser))
+      .transact(xa)
+      .recoverWith {
+        case UnexpectedEnd =>
+          Async[F].delay(List()) // In case there are no users
+      }
+  }
+
   override def findUser(username: UserName): F[Option[User]] = {
     val statement: ConnectionIO[UserDTO] =
       UserStatement.findUser(username).unique
@@ -43,6 +54,10 @@ class PostgresUserRepository[F[_]: Async](xa: Transactor[F])
 }
 
 object UserStatement {
+
+  def findAll(): Query0[UserDTO] = {
+    sql"SELECT * FROM api_user ".query[UserDTO]
+  }
 
   def findUser(username: UserName): Query0[UserDTO] = {
     sql"SELECT * FROM api_user WHERE username=${username.value}"

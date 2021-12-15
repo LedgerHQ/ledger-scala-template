@@ -5,6 +5,7 @@ import co.ledger.template.model.{User, UserName}
 object algebra {
 
   trait UserRepository[F[_]] {
+    def findAll(): F[List[User]]
     def findUser(username: UserName): F[Option[User]]
     def addUser(user: User): F[Unit]
     def updateUser(user: User): F[Unit]
