@@ -10,6 +10,10 @@ object TestUserService {
 
   val testRepo: IO[UserRepository[IO]] = Ref.of[IO, Map[model.UserName, model.User]](TestUsers.users.map(u => (u.username, u)).toMap).map{ state =>
     new UserRepository[IO] {
+      override def findAll(): IO[List[model.User]] = {
+        state.get.map(_.values.toList)
+      }
+
       override def findUser(username: UserName): IO[Option[model.User]] =
         state.get.map(_.get(username))
 

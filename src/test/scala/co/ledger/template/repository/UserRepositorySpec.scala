@@ -36,6 +36,9 @@ class UserRepositorySpec extends RepositorySpec {
     }
   }
 
+  test("find all users query") {
+    check(UserStatement.findAll())
+  }
   test("find user query") {
     check(UserStatement.findUser(users.head.username))
   }
