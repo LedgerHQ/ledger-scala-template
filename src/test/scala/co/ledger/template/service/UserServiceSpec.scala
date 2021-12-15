@@ -9,6 +9,12 @@ import co.ledger.template.model.{UserName, UserNotFound}
 
 class UserServiceSpec extends AnyFlatSpecLike with Matchers {
 
+  it should "retrieve all users" in IOAssertion {
+    EitherT(TestUserService.service.flatMap(_.findAll)).map { allUsers =>
+      allUsers should be (users)
+    }.value
+  }
+
   it should "retrieve an user" in IOAssertion {
     EitherT(TestUserService.service.flatMap(_.findUser(users.head.username))).map { user =>
       user should be (users.head)
